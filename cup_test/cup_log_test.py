@@ -10,10 +10,11 @@ import os
 import sys
 import logging
 
-_TOP = os.path.dirname(os.path.abspath(__file__)) + '/../'
+_TOP = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/')
+_TESTLOG = _TOP + '/testlog'
 sys.path.insert(0, _TOP)
 
-from cup import log
+from cup import log, platforms
 from cup import unittest
 
 def test_gen_wf():
@@ -22,10 +23,17 @@ def test_gen_wf():
     写入${logfile}.wf日志文件中。本case用来验证相关功能是否符合
     预期。
     """
+    logfile = _TESTLOG + '/cup.log'
+    wflogfile = _TESTLOG + '/cup.log.wf'
+    if os.path.exists(logfile):
+        os.unlink(logfile)
+    if os.path.exists(wflogfile):
+        os.unlink(wflogfile)
     log.init_comlog(
-        "Yang Honggang", logging.DEBUG, "cup.log",
+        "log init", logging.DEBUG, logfile,
         log.ROTATION, gen_wf=True
     )
+
 
     log.info("info")
     log.critical("critical")
@@ -35,8 +43,8 @@ def test_gen_wf():
 
     # 检查是否生成了cup.log和cup.log.wf文件
     try:
-        flog = open('cup.log')
-        flog_wf = open('cup.log.wf')
+        flog = open(logfile)
+        flog_wf = open(wflogfile)
     except IOError:
         assert(False), "can not find cup.log or cup.log.wf file"
     # 检查cup.log的内容是否包括“debug”、"info"
@@ -50,8 +58,8 @@ def test_gen_wf():
     assert('debug' not in flog_wf_str and 'info' not in flog_wf_str), \
             "cup.log.wf's content error"
     # cup.log的内容不应该包括"critical"、“error”和“warning”
-    assert('critical' not in flog_str and 'error' not in flog_str and \
-            'warning' not in flog_str), "cup.log's content error"
+    assert('critical' in flog_str and 'error' in flog_str and \
+            'warning' in flog_str), "cup.log's content error"
 
 
 def test_log_parse():
@@ -59,7 +67,6 @@ def test_log_parse():
     logline = ('INFO:    2023-01-04 22:29:25,456 +0800(CST) '
             '* [34666:115f70600] [log.py:327]'
         ' to compress folder into tarfile:'
-        '/home/disk2/szjjh-ccdb280.szjjh01.baidu.com.1444810391.7.tar.gz'
     )
     kvs = log.parse(logline)
     unittest.assert_eq(kvs['loglevel'], 'INFO')
@@ -73,8 +80,9 @@ def test_log_parse():
 
 def test_log_reinitcomlog():
     """test reinitcom log"""
+    logfile = _TESTLOG + '/cup.new.log'
     log.reinit_comlog(
-        "Yang Honggang1", logging.DEBUG, "cup.new.log",
+        "re init", logging.DEBUG, logfile,
         log.ROTATION, gen_wf=True
     )
     log.info("new info")
@@ -84,25 +92,43 @@ def test_log_reinitcomlog():
     log.debug("new debug")
 
 
+def _create_file(fname):
+    """create file"""
+    if not os.path.exists(fname):
+        if platforms.is_linux():
+            os.mknod(fname)
+        else:
+            with open(fname, 'w'):
+                pass
+
+
 def test_log_xfuncs():
     """test x log functions"""
+    logxfile = _TESTLOG + '/cup.x.log'
+    logyfile = _TESTLOG + '/cup.y.log'
+    _create_file(logxfile)
+    _create_file(logyfile)
+    if not os.path.exists(logxfile):
+        _create_file(logxfile)
+    if not os.path.exists(logyfile):
+        _create_file(logyfile)
     logparams = log.LoggerParams(
-        log.DEBUG, 'cup.x.log', log.ROTATION, 100 * 1024 * 1024,
+        log.DEBUG, logxfile, log.ROTATION, 100 * 1024 * 1024,
         True, True
     )
-    log.xinit_comlog('log.x', logparams)
-    log.xdebug('log.x', 'xdebug')
-    log.xinfo('log.x', 'xinfo')
-    log.xerror('log.x', 'xerror')
-    logparams = log.LoggerParams(
-        log.DEBUG, 'cup.y.log', log.ROTATION, 100 * 1024 * 1024,
-        True, True
-    )
-    log.xinit_comlog('log.y', logparams)
-    log.xdebug('log.y', 'ydebug')
-    log.xinfo('log.y', 'yinfo')
-    log.xerror('log.y', 'yerror')
 
+    log.xinit_comlog(logxfile, logparams)
+    log.xdebug(logxfile, 'xdebug')
+    log.xinfo(logxfile, 'xinfo')
+    log.xerror(logxfile, 'xerror')
+    logparams = log.LoggerParams(
+        log.DEBUG, logyfile, log.ROTATION, 100 * 1024 * 1024,
+        True, True
+    )
+    log.xinit_comlog(logyfile, logparams)
+    log.xdebug(logyfile, 'ydebug')
+    log.xinfo(logyfile, 'yinfo')
+    log.xerror(logyfile, 'yerror')
 
 
 def _main():

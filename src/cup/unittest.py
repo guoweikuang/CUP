@@ -8,6 +8,7 @@
 """
 from __future__ import print_function
 import os
+import platform
 import sys
 import hashlib
 import traceback
@@ -15,6 +16,7 @@ import logging
 
 from cup import log
 from cup import err
+from cup import platforms
 
 __all__ = [
     'assert_true',
@@ -230,10 +232,14 @@ def _get_md5_hex(src_file):
     with open(src_file, 'rb') as fhandle:
         md5obj = hashlib.md5()
         while True:
-            strtmp = fhandle.read(131072)  # read 128k
-            if len(strtmp) <= 0:
+            readbytes = fhandle.read(131072)  # read 128k
+            if len(readbytes) <= 0:
                 break
-            md5obj.update(strtmp.encode('utf-8'))
+            # for py2
+            if platforms.is_py2():
+                if isinstance(readbytes, str):
+                    readbytes = readbytes.decode('utf-8')
+            md5obj.update(readbytes) # pyright: ignore[reportArgumentType]
     return md5obj.hexdigest()
 
 
@@ -428,7 +434,14 @@ class CCaseExecutor(object):
         """
         failed = False
         try:
-            case.setup()
+            _already_setup = False
+            if hasattr(case, 'setup'):
+                _already_setup = True
+                case.setup()
+            if hasattr(case,'setUp'):
+                if _already_setup:
+                    raise err.TestError('setup and setUp cannot be used together')
+                case.setUp()
             case.test_run()
             case.set_result(True)
         # pylint: disable=W0703

@@ -41,6 +41,7 @@ import sys
 _const_obj = _const()
 _const_obj.VERSION = version.VERSION
 _const_obj.AUTHOR = 'mythmgn@gmail.com'
+# pyright: reportArgumentType=false
 sys.modules[__name__] = _const_obj
 
 # vi:set tw=0 ts=4 sw=4 nowrap fdm=indent

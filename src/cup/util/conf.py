@@ -6,6 +6,7 @@
 :description:
     Complex and constructive conf support
 """
+# pyright: reportAttributeAccessIssue=false
 from __future__ import print_function
 import os
 import time
@@ -32,195 +33,7 @@ __all__ = [
 def _open_codecs(filename, mode='r', encoding=None):
     """open_codecs for py2 in order to support encoding"""
     return codecs.open(filename=filename, mode=mode, encoding=encoding)
-
-
-class CConf(object):
-    """
-    Depreciated class. Please do not use it. Use python configparser instead.
-    """
-    def __init__(self, path, name, revert_version=''):
-        self.name = name
-        self.path = path
-        self.file_abspath = self.path + '/' + self.name
-        self.exclude = ['# ', '[']
-        self.sep = ':'
-        self.bakfile = self.path + '/' + self.name + '.bak.' + revert_version
-
-    def __del__(self):
-        if os.path.exists(self.bakfile):
-            os.unlink(self.bakfile)
-
-    def _backup(self, new_bakfile):
-        shutil.copyfile(self.file_abspath, new_bakfile)
-
-    def __getitem__(self, key):
-        with open(self.file_abspath) as src:
-            value = ''
-            for line in src.readlines():
-                if len(line) > 0 and line[0] not in self.exclude:
-                    spstrs = line.split(':')
-                    k = spstrs[0].strip()
-                    if k == key:
-                        value = spstrs[1].strip()
-        return value
-
-    def __len__(self):
-        """
-            This function should not be used
-        """
-        return 0
-
-    def update(self, kvs):
-        """
-        update conf with a dict.
-
-        dict = {'key' : 'value', 'key1': 'value'}
-        """
-        self._backup(self.bakfile)
-        with open(self.bakfile) as src:
-            with open(self.file_abspath, 'w') as trg:
-                for line in src.readlines():
-                    if len(line) > 0 and line[0] not in self.exclude:
-                        splist = line.splistlit(':')
-                        k = splist[0].strip()
-                        if k in kvs.keys():
-                            line = k + ' : ' + kvs[k] + '\n'
-                    trg.write(line)
-
-    def revert(self):
-        """
-        revert the conf
-        """
-        os.rename(self.bakfile, self.file_abspath)
-
-    def write_kv_into_conf(self, kvkvs):
-        """
-        将key-value写进conf
-        """
-        with open(self.file_abspath, 'w+') as fhandle:
-            for i in kvkvs.keys:
-                fhandle.write('%s:%s\n' % (i, kvkvs[i]))
-
-
-class CConfModer(object):
-    """
-    deprecated. Recommand using Configure2Dict / Dict2Configure
-    """
-    def __init__(self, toolpath):
-        if not os.path.exists(toolpath):
-            raise IOError(
-                'File not found - The cfmod tool cannot be found: %s'
-                % toolpath
-            )
-        self._modtool = toolpath
-
-    def updatekv(self, confpath, key, val):
-        """
-        update key with value
-        """
-        cmd = "%s -c %s -u %s:%s " % (self._modtool, confpath, key, val)
-        try_times = 0
-        while True:
-            ret = cup.shell.ShellExec().run(cmd, 120)
-            if(
-                ret['returncode'] == 0
-                or not ret['returncode']
-                or try_times > 1
-            ):
-                ret['stdout'] = ret['stdout'].decode('gbk')
-                ret['stdout'] = ret['stdout'].encode('utf-8')
-                # print ret['stdout']
-                break
-            else:
-                try_times += 1
-                print('err:updatekv')
-                time.sleep(1)
-
-    def updatekvlist(self, confpath, kvlist):
-        """
-        update a list of key/value
-        """
-        strcmd = ''
-        for key_value in kvlist:
-            strcmd += ' -u %s:%s ' % (key_value['key'], key_value['value'])
-        cmd = "%s  -c %s %s" % (self._modtool, confpath, strcmd)
-        try_times = 0
-        while True:
-            ret = cup.shell.ShellExec().run(cmd, 120)
-            if(
-                ret['returncode'] == 0
-                or not ret['returncode']
-                or try_times > 1
-            ):
-                ret['stdout'] = ret['stdout'].decode('gbk')
-                ret['stdout'] = ret['stdout'].encode('utf-8')
-                print(ret['stdout'])
-                break
-            else:
-                try_times += 1
-                print('err:updatekvlist')
-                time.sleep(1)
-
-    def addkv(self, confpath, key, val):
-        """
-        add key value into a conf
-        """
-        cmd = "%s -c %s -i %s:%s &>/dev/null" % (
-            self._modtool, confpath, key, val
-        )
-        try_times = 0
-        while True:
-            ret = cup.shell.ShellExec().run(cmd, 120)
-            if(
-                ret['returncode'] == 0
-                or not ret['returncode']
-                or try_times > 1
-            ):
-                ret['stdout'] = ret['stdout'].decode('gbk')
-                ret['stdout'] = ret['stdout'].encode('utf-8')
-                print(ret['stdout'])
-                break
-            else:
-                try_times += 1
-                print('err:addkv')
-                time.sleep(1)
-
-            if(ret == 0 or try_times > 1):
-                print(cmd)
-                break
-            else:
-                time.sleep(1)
-                try_times += 1
-
-    def delkv(self, confpath, key):
-        """
-        del a key from a conf file
-        """
-        cmd = "%s -c %s -d %s " % (self._modtool, confpath, key)
-        try_times = 0
-        while True:
-            ret = cup.shell.ShellExec().run(cmd, 120)
-            if(
-                ret['returncode'] == 0
-                or not ret['returncode']
-                or try_times > 1
-            ):
-                ret['stdout'] = ret['stdout'].decode('gbk')
-                ret['stdout'] = ret['stdout'].encode('utf-8')
-                print(ret['stdout'])
-                break
-            else:
-                try_times += 1
-                print('err:delkv')
-                time.sleep(1)
-
-            if(ret == 0 or try_times > 1):
-                print(cmd)
-                break
-            else:
-                time.sleep(1)
-                try_times += 1
-
+    
 
 class ArrayFormatError(cup.err.BaseCupException):
     """
@@ -311,7 +124,7 @@ class ConfList(list):
             return (self.__getitem__(ind), [])
 
     def __delitem__(self, index):
-        list.__delitem__(index)
+        list.__delitem__(self, index)
         del self._comments[index]
 
     def append(self, item):
@@ -558,6 +371,8 @@ class Configure2Dict(object):  # pylint: disable=R0903
             raise IOError('%s does not exists' % configure_file)
         if not os.path.isfile(configure_file):
             raise IOError('%s is not a file' % configure_file)
+        self._absfpath = os.path.abspath(configure_file)
+        self._absdir = os.path.dirname(self._absfpath)
         self._lines = []
         self._dict = ConfDict()
         self._remove_comments = remove_comments
@@ -732,9 +547,9 @@ class Configure2Dict(object):  # pylint: disable=R0903
                             # conf_dict_now[tmpkey] = ConfDict()
                             if tmpkey != last_list_key:
                                 conf_layer_stack[-1] = conf_dict_now[tmpkey]
-                            conf_layer_stack[-1].append_ex(
+                            conf_layer_stack[-1].append_ex(  # pyright: ignore[reportAttributeAccessIssue]
                                 ConfDict(), comments
-                            )
+                            ) 
                             comments = []
                         else:  # different group
                             conflist = ConfList()
@@ -756,7 +571,7 @@ class Configure2Dict(object):  # pylint: disable=R0903
                         tmpkey = key[1:]
                         if tmpkey in conf_dict_now:  # the same group
                             tmpdict = ConfDict()
-                            conf_layer_stack[level - 1].append(tmpdict)
+                            conf_layer_stack[level - 1].append(tmpdict)  # pyright: ignore[reportAttributeAccessIssue]
                         else:  # different group
                             conflist = ConfList()
                             conflist.append(ConfDict())
@@ -798,7 +613,9 @@ class Configure2Dict(object):  # pylint: disable=R0903
         if ignore_error:
             try:
                 include_file = line.split()[-1].strip('"')
-                include_dict = Configure2Dict(include_file).get_dict(
+                if not os.path.isabs(include_file):
+                    include_absfile = os.path.join(self._absdir, include_file)
+                include_dict = Configure2Dict(include_absfile).get_dict(
                     ignore_error
                 )
                 if '$include' not in self._dict:
@@ -809,10 +626,10 @@ class Configure2Dict(object):  # pylint: disable=R0903
                     )
             # pylint: disable=W0703
             # Does not know exact exception type
-            except Exception:
+            except Exception as err:
                 cup.log.warn(
-                    'failed to handle include file, line:{0}'.format(
-                        line)
+                    'failed to handle include file, line:{0}, err {1}'.format(
+                        line, err)
                 )
         else:
             include_file = line.split()[-1].strip('"')
@@ -986,7 +803,7 @@ class Dict2Configure(object):
     @classmethod
     def _comp_write_keys(cls, valuex, valuey):
         if platforms.is_py2():
-            _py_type = [bool, int, float, str, unicode]
+            _py_type = [bool, int, float, str, unicode] # pyright: ignore[reportUndefinedVariable] # noqa: F821
         else:
             _py_type = [bool, int, float, str]
 
@@ -1249,14 +1066,14 @@ class HdfsXmlConf(object):
                 else:
                     need_modify = True
                 if need_modify:
-                    valuenode.firstChild.replaceWholeText(
+                    valuenode.firstChild.replaceWholeText(  # pyright: ignore[reportOptionalMemberAccess]
                         tmpdict[name]['value']
                     )
                 del tmpdict[name]
             else:
                 parent = pro.parentNode
-                parent.insertBefore(dom.createComment(pro.toxml()), pro)
-                parent.removeChild(pro)
+                parent.insertBefore(dom.createComment(pro.toxml()), pro)  # pyright: ignore[reportOptionalMemberAccess]
+                parent.removeChild(pro)   # pyright: ignore[reportOptionalMemberAccess]
 
         configuration_node = dom.getElementsByTagName('configuration')[0]
         for name in tmpdict:

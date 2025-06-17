@@ -16,9 +16,6 @@ from cup.util import misc
 from cup.services import threadpool
 from cup import thread
 from cup.services import generator
-from cup.services import autowait
-CConf = conf.CConf
-CConfModer = conf.CConfModer
 CGeneratorMan = generator.CGeneratorMan
 ThreadPool = threadpool.ThreadPool
 CAck = misc.CAck

@@ -180,4 +180,13 @@ class NotImplementedYet(BaseCupException):
         BaseCupException.__init__(self, msg)
 
 
+class TestError(BaseCupException):
+    """
+    TestError
+    """
+    def __init__(self, msg=''):
+        msg = 'TestError: %s' % msg
+        BaseCupException.__init__(self, msg)
+
+
 # vi:set tw=0 ts=4 sw=4 nowrap fdm=indent

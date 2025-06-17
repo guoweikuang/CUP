@@ -6,15 +6,12 @@
 :description:
     cup thread module
 """
-
-__all__ = ['async_raise', 'CupThread', 'RWLock', 'thread_alive']
-
-
 import threading
 import time
 import ctypes
-
 import cup
+
+__all__ = ['async_raise', 'CupThread', 'RWLock', 'thread_alive']
 
 
 def async_raise(tid, exctype):
@@ -82,7 +79,7 @@ class CupThread(threading.Thread):
             return self._thread_id
         # pylint: disable=W0212
         # no, look for it in the _active dict
-        for tid, tobj in threading._active.items():
+        for tid, tobj in threading._active.items(): # pyright: ignore reportUnknownMemberType
             if tobj is self:
                 # pylint: disable=W0201
                 self._thread_id = tid

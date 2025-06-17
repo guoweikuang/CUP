@@ -7,6 +7,8 @@ dist/
 docs/_build/
 cup.egg-info/
 docs.bidu
+venv/
+.vscode
 
 # cup files
 cup/net/async/msgcenter_dict.py
@@ -16,6 +18,8 @@ cup.tar.gz
 cup/ChangeLog.bak
 
 # other files begin {
+*.lock
+*.whl
 *.pyc
 .svn
 build.sh

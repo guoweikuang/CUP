@@ -9,9 +9,12 @@
 import os
 import sys
 import time
+import unittest as sysut
 
-_NOW_PATH = os.path.dirname(os.path.abspath(__file__)) + '/'
-sys.path.insert(0, _NOW_PATH + '../')
+_TOP = os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/')
+sys.path.insert(0, _TOP + '../')
+_TESTLOG = _TOP + 'testlog'
+
 
 import cup
 from cup import unittest
@@ -19,22 +22,18 @@ from cup import log
 from cup.services import executor
 
 
-class TestMyCase(unittest.CUTCase):
+class TestMyCase(sysut.TestCase):
     """
     test class for cup
     """
-    def __init__(self):
-        super(self.__class__, self).__init__(
-            './test.log', log.DEBUG
-        )
-        log.info('Start to run ' + str(__file__))
-        self._executor = executor.ExecutionService(
-        )
 
-    def setup(self):
+    def setUp(self):
         """
         setup
         """
+        log.init_comlog('executor_test', log.DEBUG, _TESTLOG, log.ROTATION, 1024*1024*10, False, True)
+        self._executor = executor.ExecutionService(
+        )
         self._executor.run()
         self._info = time.time()
 
@@ -51,7 +50,7 @@ class TestMyCase(unittest.CUTCase):
         time.sleep(5)
         assert time.time() < self._info
 
-    def teardown(self):
+    def tearDown(self):
         """
         teardown
         """

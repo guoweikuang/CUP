@@ -9,6 +9,7 @@
 import os
 import sys
 import copy
+import fcntl
 import shutil
 
 
@@ -38,10 +39,11 @@ if platforms.is_linux() or platforms.is_mac():
     FILELOCK_NONBLOCKING = fcntl.LOCK_NB
     FILELOCK_UNLOCK = fcntl.LOCK_UN
 elif platforms.is_windows():
+    
     import msvcrt
-    FILELOCK_EXCLUSIVE = msvcrt.LK_RLCK
-    FILELOCK_NONBLOCKING = msvcrt.LK_RLCK
-    FILELOCK_UNLOCK = msvcrt.LK_UNLCK
+    FILELOCK_EXCLUSIVE = msvcrt.LK_RLCK # pyright: ignore[reportAttributeAccessIssue]
+    FILELOCK_NONBLOCKING = msvcrt.LK_RLCK # pyright: ignore[reportAttributeAccessIssue]
+    FILELOCK_UNLOCK = msvcrt.LK_UNLCK # pyright: ignore[reportAttributeAccessIssue]
     def file_size(fobj):
         """win file size"""
         return os.path.getsize(os.path.realpath(fobj.name) )
@@ -52,11 +54,11 @@ elif platforms.is_windows():
         flags = FILELOCK_EXCLUSIVE
         if not blocking:
             flags = FILELOCK_NONBLOCKING
-        msvcrt.locking(fobj.fileno(), flags, file_size(fobj))
+        msvcrt.locking(fobj.fileno(), flags, file_size(fobj)) # pyright: ignore[reportAttributeAccessIssue]
 
     def win_unlockfile(fobj):
         """win unlock file"""
-        msvcrt.locking(fobj.fileno(), FILELOCK_UNLOCK, file_size(fobj))
+        msvcrt.locking(fobj.fileno(), FILELOCK_UNLOCK, file_size(fobj)) # pyright: ignore[reportAttributeAccessIssue]
 
 
 class LockFile:
@@ -75,7 +77,7 @@ class LockFile:
         filelock.unlock()
     """
 
-    def __init__(self, fpath, locktype=FILELOCK_EXCLUSIVE):
+    def __init__(self, fpath, locktype=FILELOCK_EXCLUSIVE):  # pyright: ignore[reportPossiblyUnboundVariable]
         """
         exclusive lockfile, by default.
 
@@ -88,16 +90,14 @@ class LockFile:
             cup.err.LockFileError if we encounter errors
         """
         self._fpath = fpath
-        self._locktype = locktype
-        self._fhandle = None
+        self._locktype = locktype # pyright: ignore[reportPossiblyUnboundVariable]
+        self._fhandle: int
         try:
             self._fhandle = os.open(
                 self._fpath, os.O_CREAT | os.O_RDWR
             )
         except IOError as error:
-            raise err.LockFileError(error)
-        except OSError as error:
-            raise err.LockFileError(error)
+            raise err.LockFileError(str(error))
         except Exception as error:
             raise err.LockFileError(
                 'catch unkown error type:{0}'.format(error)
@@ -145,9 +145,9 @@ class LockFile:
             try:
                 ret = fcntl.flock(self._fhandle, flags)
             except IOError as error:
-                raise err.LockFileError(error)
+                raise err.LockFileError(str(error))
             except Exception as error:
-                raise err.LockFileError(error)
+                raise err.LockFileError(str(error))
             return ret
         elif platforms.is_windows():
             win_lockfile(self._fhandle, blocking)
@@ -158,7 +158,7 @@ class LockFile:
             try:
                 fcntl.flock(self._fhandle, FILELOCK_UNLOCK)
             except Exception as error:
-                raise err.LockFileError(error)
+                raise err.LockFileError(str(error))
         elif platforms.is_windows():
             win_unlockfile(self._fhandle)
 
@@ -167,7 +167,6 @@ class LockFile:
         return filepath
         """
         return self._fpath
-
 
 
 def mk_newnode(abspath, check_exsistence=False):

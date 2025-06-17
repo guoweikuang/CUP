@@ -10,6 +10,7 @@ import os
 import sys
 
 _TOP = os.path.dirname(os.path.abspath(__file__)) + '/../'
+_TESTDIR = os.path.dirname(os.path.abspath(__file__)) + '/'
 sys.path.insert(0, _TOP)
 
 from cup import err
@@ -17,7 +18,7 @@ from cup import exfile
 from cup import unittest
 
 
-LOCK_FILE = './.file_test.lock'
+LOCK_FILE = _TESTDIR + 'file_test.lock'
 
 
 def _cleanup():

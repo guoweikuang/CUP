@@ -6,7 +6,7 @@
 :description:
     host route info related module
 """
-import requests
+import requests # pyright: ignore[reportMissingModuleSource]
 
 __all__ = ['realip_v4']
 

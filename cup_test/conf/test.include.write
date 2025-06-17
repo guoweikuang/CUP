@@ -1,4 +1,4 @@
-$include "./conf/test.included.conf"
+$include "./test.included.conf"
 
 global-key:global_value
 @global:1
