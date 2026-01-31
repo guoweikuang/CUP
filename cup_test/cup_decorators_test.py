@@ -20,8 +20,8 @@ class TestD:
         """
         print("test func")
     
-    @classmethod
-    def singleton_instance(cls, firstinit=False):
+    @staticmethod
+    def singleton_instance(firstinit=False):
         if firstinit:
             print('first init here')
         return TestD()
@@ -32,6 +32,18 @@ class TestSingleTon:
     def __init__(self) -> None:
         """
         """
+
+
+class TestSingletonFunc:
+    def __init__(self) -> None:
+        """
+        """
+    
+    @decorators.Singleton
+    @staticmethod
+    def singleton_instance():
+        print('first init here')
+        return TestSingletonFunc()
 
 
 def test_decorator_singleton():
@@ -45,6 +57,7 @@ def test_decorator_singleton():
     assert c is d
     assert e is d
 
-test_decorator_singleton()
+# test_decorator_singleton()
+TestSingletonFunc.singleton_instance()
 
 # vi:set tw=0 ts=4 sw=4 nowrap fdm=indent

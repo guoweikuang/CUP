@@ -144,7 +144,6 @@ class CGeneratorMan(CGeneratorManBase):
         super().__init__(str_prefix)
     
 
-@decorators.Singleton
 class Py3Generator(CGeneratorManBase):
     """py3 generator"""
 
@@ -155,8 +154,9 @@ class Py3Generator(CGeneratorManBase):
         """
         super().__init__(str_prefix)
 
-    @classmethod
-    def single_instance(cls, str_prefix='localhost'):
+    @decorators.Singleton
+    @staticmethod
+    def single_instance(str_prefix='localhost'):
         """
         get single instance of this class
         """
@@ -237,6 +237,11 @@ class CycleIDGenerator(object):
             return ip, port
         except struct.error as err:
             raise ValueError('failed to convert the hex')
+    
+    @decorators.Singleton
+    @staticmethod
+    def singleton_instance(ipaddr, port):
+        return CycleIDGenerator(ipaddr, port)
 
 
 class CachedUUID(object):
@@ -294,8 +299,11 @@ class CachedUUID(object):
         size = self._fifoque.qsize()
         log.info('after generate cached uuid queue size :{0}'.format(size))
     
-    @classmethod
-    def singleton_instance(cls, mode=UUID1, max_cachenum=100, firstinit=False):
+    @decorators.Singleton
+    @staticmethod
+    def singleton_instance(mode=UUID1, max_cachenum=100, firstinit=False):
+        if firstinit:
+            log.info('first init cached uuid')
         return CachedUUID(mode, max_cachenum)
 
 # vi:set tw=0 ts=4 sw=4 nowrap fdm=indent

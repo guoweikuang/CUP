@@ -197,7 +197,7 @@ class ExecutionService(AbstractExecution):
         return True if self._status == 1 else False
     
     @decorators.Singleton
-    @classmethod
+    @staticmethod
     def singleton_instance(delay_exe_thdnum=3, queue_exec_thdnum=4, name=None, firstinit=False):
         return ExecutionService(delay_exe_thdnum=3, queue_exec_thdnum=4, name=None)
 

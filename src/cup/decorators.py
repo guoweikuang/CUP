@@ -7,9 +7,10 @@
     decorators related module
 """
 from __future__ import print_function
-
+import pdb
 import os
 import time
+import inspect
 import platform
 import threading
 import functools
@@ -31,9 +32,14 @@ _LOCK = threading.Lock()
 
 def _get_singlename(cls):
     key = ''
-    for mr in cls.mro():
-        key = f'{mr.__name__}_{key}'
-    return key
+    if inspect.isfunction(cls) or type(cls) is staticmethod:
+        key = cls.__qualname__.split('.')[0]
+    elif inspect.isclass(cls):
+        key = cls.__name__
+    else:
+        raise ValueError('not supported. Only class or staticmethod is supported')
+    name = f'{cls.__module__}.{key}'
+    return name
 
 
 def Singleton(cls):
@@ -56,6 +62,36 @@ def Singleton(cls):
             return obj
         return wrapper
     return decorator(cls)
+
+
+# class Singleton(object):  # pylint: disable=R0903
+#     """
+#     Make your class singeton
+
+#     example::
+
+#         from cup import decorators
+
+#         @decorators.Singleton
+#         class YourClass(object):
+#             def __init__(self):
+#             pass
+#     """
+#     def __init__(self, cls):
+#         self.__instance = None
+#         self.__cls = cls
+#         self._lock = threading.Lock()
+
+#     def __call__(self, *args, **kwargs):
+#         self._lock.acquire()
+#         def wrapper(*args, **kwargs):
+#             if self.__instance is None:
+#                 self.__instance = self.__cls(*args, **kwargs)
+#                 # functools.wraps(self.__instance)
+#                 # self.__instance.__wrapped__ = self.__cls
+#             return self.__instance
+#         self._lock.release()
+#         return wrapper
 
 
 def py_versioncheck(function, version):

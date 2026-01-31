@@ -1,6 +1,6 @@
 # 0. Version Under Development
 
-## Version 3.2.34
+## Version 3.2.35
 
 * cup.services.generator
   * [new] replace CGeneratorMan with new class Py3Generator
@@ -16,6 +16,8 @@
 * cup.storage.obj s3 object apis
   * [new] Add ssl verify support with local public crt file
   * [enhancement] Change open mode from unspecified to binary mode. r -> rb; w+ -> wb
+* cup.decorators
+  * enhance Singleton.  You can use it in a class or a staticmethod (singleton_instance) in a class
 
 # 1. Versions Released
 
