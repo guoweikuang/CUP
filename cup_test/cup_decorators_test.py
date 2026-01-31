@@ -6,7 +6,6 @@
 :description:
 
 """
-import pdb
 from cup import decorators
 
 
@@ -49,4 +48,3 @@ def test_decorator_singleton():
 test_decorator_singleton()
 
 # vi:set tw=0 ts=4 sw=4 nowrap fdm=indent
-

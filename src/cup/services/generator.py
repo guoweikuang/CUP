@@ -239,7 +239,6 @@ class CycleIDGenerator(object):
             raise ValueError('failed to convert the hex')
 
 
-@decorators.Singleton
 class CachedUUID(object):
     """cached uuid object"""
     def __init__(self, mode=UUID1, max_cachenum=100):
