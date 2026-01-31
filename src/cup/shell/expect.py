@@ -9,12 +9,17 @@
     See it at http://docs.paramiko.org/en/stable/
 """
 import os
-import traceback
 import stat
+import sys
+import warnings
+import traceback
 
 import cup
-import paramiko
-from paramiko import ssh_exception
+try:
+    import paramiko
+    from paramiko import ssh_exception
+except ImportError:
+    assert False, 'Please install paramiko first'
 
 
 __all__ = [

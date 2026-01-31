@@ -24,33 +24,38 @@ __all__ = [
     'py_versioncheck'
 ]
 
+_SINGONTON_LOCKS = {}
+_SINGLETON_OBJS = {}
+_LOCK = threading.Lock()
 
-class Singleton(object):  # pylint: disable=R0903
-    """
-    Make your class singeton
 
-    example::
+def _get_singlename(cls):
+    key = ''
+    for mr in cls.mro():
+        key = f'{mr.__name__}_{key}'
+    return key
 
-        from cup import decorators
 
-        @decorators.Singleton
-        class YourClass(object):
-            def __init__(self):
-            pass
-    """
-    def __init__(self, cls):
-        self.__instance = None
-        self.__cls = cls
-        self._lock = threading.Lock()
-
-    def __call__(self, *args, **kwargs):
-        self._lock.acquire()
-        if self.__instance is None:
-            self.__instance = self.__cls(*args, **kwargs)
-            functools.wraps(self.__instance)
-            self.__instance.__wrapped__ = self.__cls
-        self._lock.release()
-        return self.__instance
+def Singleton(cls):
+    global _LOCK
+    global _SINGONTON_LOCKS
+    _LOCK.acquire()
+    key = _get_singlename(cls)
+    lock = _SINGONTON_LOCKS.get(key, None)
+    if lock is None:
+        lock = threading.Lock()
+        _SINGONTON_LOCKS[key] = lock
+    _LOCK.release()
+    @functools.wraps(cls)
+    def decorator(classobj):
+        def wrapper(*args, **kwargs):
+            lock.acquire()
+            obj = _SINGLETON_OBJS.get(key, classobj(*args, **kwargs))
+            _SINGLETON_OBJS[key] = obj
+            lock.release()
+            return obj
+        return wrapper
+    return decorator(cls)
 
 
 def py_versioncheck(function, version):

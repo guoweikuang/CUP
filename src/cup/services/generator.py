@@ -144,6 +144,7 @@ class CGeneratorMan(CGeneratorManBase):
         super().__init__(str_prefix)
     
 
+@decorators.Singleton
 class Py3Generator(CGeneratorManBase):
     """py3 generator"""
 
@@ -155,7 +156,6 @@ class Py3Generator(CGeneratorManBase):
         super().__init__(str_prefix)
 
     @classmethod
-    @decorators.Singleton
     def single_instance(cls, str_prefix='localhost'):
         """
         get single instance of this class
@@ -239,7 +239,7 @@ class CycleIDGenerator(object):
             raise ValueError('failed to convert the hex')
 
 
-
+@decorators.Singleton
 class CachedUUID(object):
     """cached uuid object"""
     def __init__(self, mode=UUID1, max_cachenum=100):
@@ -296,7 +296,6 @@ class CachedUUID(object):
         log.info('after generate cached uuid queue size :{0}'.format(size))
     
     @classmethod
-    @decorators.Singleton
     def singleton_instance(cls, mode=UUID1, max_cachenum=100, firstinit=False):
         return CachedUUID(mode, max_cachenum)
 

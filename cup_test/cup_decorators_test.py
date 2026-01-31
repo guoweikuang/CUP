@@ -10,6 +10,7 @@ import pdb
 from cup import decorators
 
 
+@decorators.Singleton
 class TestD:
     def __init__(self) -> None:
        """
@@ -21,20 +22,31 @@ class TestD:
         print("test func")
     
     @classmethod
-    @decorators.Singleton
     def singleton_instance(cls, firstinit=False):
         if firstinit:
             print('first init here')
         return TestD()
 
 
+@decorators.Singleton
+class TestSingleTon:
+    def __init__(self) -> None:
+        """
+        """
+
+
 def test_decorator_singleton():
-    a: TestD = TestD.singleton_instance(firstinit=True)
+    a: TestD = TestD()
     a.funca()
-    b: TestD = TestD.singleton_instance(firstinit=False)
+    b: TestD = TestD()
     assert a is b
+    c = TestSingleTon()
+    d = TestSingleTon()
+    e = TestSingleTon()
+    assert c is d
+    assert e is d
 
-
+test_decorator_singleton()
 
 # vi:set tw=0 ts=4 sw=4 nowrap fdm=indent
 

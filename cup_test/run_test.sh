@@ -20,4 +20,4 @@ source $TOPDIR/.venv/bin/activate
 source $TESTDIR/profile.test
 
 pytest -s -v --alluredir=$TOPDIR/cup_test/allure-results $TOPDIR/cup_test
-allure generate
+allure generate --clean
