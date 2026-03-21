@@ -57,7 +57,9 @@ def test_decorator_singleton():
     assert c is d
     assert e is d
 
-# test_decorator_singleton()
-TestSingletonFunc.singleton_instance()
 
+# test_decorator_singleton()
+a = TestSingletonFunc.singleton_instance()
+b = TestSingletonFunc.singleton_instance()
+assert a is b
 # vi:set tw=0 ts=4 sw=4 nowrap fdm=indent

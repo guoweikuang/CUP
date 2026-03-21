@@ -56,8 +56,12 @@ def Singleton(cls):
     def decorator(classobj):
         def wrapper(*args, **kwargs):
             lock.acquire()
-            obj = _SINGLETON_OBJS.get(key, classobj(*args, **kwargs))
-            _SINGLETON_OBJS[key] = obj
+            obj = None
+            if key in _SINGLETON_OBJS:
+                obj = _SINGLETON_OBJS[key]
+            else:
+                obj = classobj(*args, **kwargs)
+                _SINGLETON_OBJS.setdefault(key, obj)
             lock.release()
             return obj
         return wrapper
